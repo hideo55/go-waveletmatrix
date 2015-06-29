@@ -193,6 +193,69 @@ func (wm *WMData) FreqRange(minC, maxC, begPos, endPos uint64) uint64 {
 	return maxLess - minLess
 }
 
+func (wm *WMData) QuantileRange(begPos, endPos, k uint64) (pos, val uint64) {
+	if endPos >= wm.size || begPos >= endPos || k >= (endPos-begPos) {
+		pos = NotFound
+		val = NotFound
+		return
+	}
+
+	val = 0
+
+	nodeNum := uint64(0)
+	begZero := uint64(0)
+	endZero := uint64(0)
+
+	fromZero := (begPos == 0)
+	toEnd := (endPos == wm.size)
+
+	for i := uint64(0); i < wm.alphabetBitNum; i++ {
+		bv := wm.bv[i]
+
+		if fromZero {
+			begZero = wm.nodePos[i][nodeNum]
+		} else {
+			begZero, _ = bv.Rank0(begPos)
+		}
+
+		if toEnd {
+			endZero = wm.nodePos[i][nodeNum+uint64(1)]
+		} else {
+			endZero, _ = bv.Rank0(endPos)
+		}
+
+		zeroBits := endZero - begZero
+		bit := uint64(1)
+		if k < zeroBits {
+			bit = uint64(0)
+		}
+		if bit == uint64(1) {
+			k -= zeroBits
+			begPos += wm.nodePos[i][1] - begZero
+			endPos += wm.nodePos[i][1] - endZero
+		} else {
+			begPos = begZero
+			endPos = endZero
+		}
+
+		nodeNum |= bit << i
+		val <<= 1
+		val |= bit
+	}
+	pos, _ = wm.Select(val, begPos+k-wm.nodePos[wm.alphabetBitNum-uint64(1)][val]+uint64(1))
+	return
+}
+
+func (wm *WMData) MaxRange(begPos, endPos uint64) (pos, val uint64) {
+	pos, val = wm.QuantileRange(begPos, endPos, endPos-begPos-uint64(1))
+	return
+}
+
+func (wm *WMData) MinRange(begPos, endPos uint64) (pos, val uint64) {
+	pos, val = wm.QuantileRange(begPos, endPos, 0)
+	return
+}
+
 func toBool(bit uint64) bool {
 	if bit == 0{
 		return false

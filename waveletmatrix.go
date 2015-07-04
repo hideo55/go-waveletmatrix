@@ -36,13 +36,33 @@ type queryOnNode struct {
 }
 
 type WaveletMatrix interface {
+	Size() uint64
 	Lookup(pos uint64) (uint64, bool)
+	Rank(c, pos uint64) (uint64, bool)
+	RankAll(c, beginPos, endPos uint64) (rank, rankLessThan, rankMoreThan uint64)
+	RankLessThan(c, pos uint64) uint64
+	RankMoreThan(c, pos uint64) uint64
+	Select(c, rank uint64) (uint64, bool)
+	SelectFromPos(c, pos, rank uint64) (uint64, bool)
+	Freq(c uint64) uint64
+	FreqSum(minC, maxC uint64) uint64
+	FreqRange(minC, maxC, begPos, endPos uint64) uint64
+	QuantileRange(begPos, endPos, k uint64) (pos, val uint64)
+	MaxRange(begPos, endPos uint64) (pos, val uint64)
+	MinRange(begPos, endPos uint64) (pos, val uint64)
+	ListModeRange(minC, maxC, begPos, endPos, num uint64) []ListResult
+	ListMinRange(minC, maxC, begPos, endPos, num uint64) []ListResult
+	ListMaxRange(minC, maxC, begPos, endPos, num uint64) []ListResult
 }
 
 const (
 	// NotFound indicates `value is not found`
 	NotFound uint64 = 0xFFFFFFFFFFFFFFFF
 )
+
+func (wm *WMData) Size() uint64 {
+	return wm.size
+}
 
 func (wm *WMData) Lookup(pos uint64) (uint64, bool) {
 	if pos >= wm.size {

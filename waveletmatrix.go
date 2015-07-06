@@ -191,8 +191,8 @@ func (wm *WMData) SelectFromPos(c, pos, rank uint64) (uint64, bool) {
 
 	index += rank
 
-	for i := wm.alphabetBitNum - uint64(1); i >= 0; i-- {
-		bit := (c >> (wm.alphabetBitNum - i - uint64(1))) & 1
+	for i := int(wm.alphabetBitNum) - 1; i >= 0; i-- {
+		bit := (c >> (wm.alphabetBitNum - uint64(i) - uint64(1))) & 1
 		b := toBool(bit)
 		if b {
 			index -= wm.nodePos[i][1]

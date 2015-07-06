@@ -103,7 +103,7 @@ func (wm *WMData) Rank(c, pos uint64) (uint64, bool) {
 		bv := wm.bv[i]
 		bit := (c >> (wm.alphabetBitNum - i - uint64(1))) & uint64(1)
 		b := toBool(bit)
-		endPos, _ := bv.Rank(endPos, b)
+		endPos, _ = bv.Rank(endPos, b)
 		if b {
 			endPos += wm.nodePos[i][1]
 		}

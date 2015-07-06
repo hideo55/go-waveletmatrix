@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestBuild(t *testing.T) {
+func TestBuildAndAccess(t *testing.T) {
 	builder := NewWMBuilder()
 	src := []uint64{5, 1, 0, 4, 2, 2, 0, 3}
 	wm, _ := builder.Build(src)
@@ -19,5 +19,8 @@ func TestBuild(t *testing.T) {
 		if v != src[i] {
 			t.Error("Exprected", src[i], "Got", v)
 		}
+	}
+	if r, _ := wm.Rank(uint64(3), uint64(6)); r != uint64(0) {
+		t.Error("Expected", 0, "Got", r)
 	}
 }

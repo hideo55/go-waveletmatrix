@@ -2,6 +2,7 @@ waveletmatrix
 =============
 
 [![Build Status](https://travis-ci.org/hideo55/go-waveletmatrix.svg?branch=master)](https://travis-ci.org/hideo55/go-waveletmatrix)
+[![Coverage Status](https://coveralls.io/repos/hideo55/go-waveletmatrix/badge.svg?branch=master&service=github)](https://coveralls.io/github/hideo55/go-waveletmatrix?branch=master)
 
 Description
 -----------

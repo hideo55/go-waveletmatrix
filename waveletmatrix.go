@@ -365,7 +365,7 @@ func prefixCode(x, size, bitNum uint64) uint64 {
 }
 
 func (wm *WMData) checkPrefix(prefix, depth, minC, maxC uint64) bool {
-	if prefixCode(minC, depth, wm.alphabetBitNum) <= prefix && prefixCode(maxC, depth, wm.alphabetBitNum) >= prefix {
+	if prefixCode(minC, depth, wm.alphabetBitNum) <= prefix && prefixCode(maxC - uint64(1), depth, wm.alphabetBitNum) >= prefix {
 		return true
 	}
 	return false

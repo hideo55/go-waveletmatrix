@@ -24,6 +24,7 @@ func TestBuildAndAccess(t *testing.T) {
 		t.Error("Unexpected", v)
 	}
 
+	// Rank
 	if r, _ := wm.Rank(0, 0); r != uint64(0) {
 		t.Error("Expected", 0, "Got", r)
 	}
@@ -62,7 +63,6 @@ func TestBuildAndAccess(t *testing.T) {
 		t.Error("Unexpected")
 	}
 
-
 	if r := wm.RankLessThan(4, 5); r != uint64(3) {
 		t.Error("Expected", 3, "Got", r)
 	}
@@ -72,9 +72,20 @@ func TestBuildAndAccess(t *testing.T) {
 	if f := wm.Freq(2); f != uint64(2) {
 		t.Error("Expected", 2, "Got", f)
 	}
+
 	if f := wm.FreqRange(2, 5, 2, 6); f != uint64(3) {
 		t.Error("Expected", 3, "Got", f)
 	}
+	if f := wm.FreqRange(10, 11, 1, 6); f != uint64(0) {
+		t.Error("Expected", 0, "Got", f)
+	}
+	if f := wm.FreqRange(3, 2, 1, 6); f != uint64(0) {
+		t.Error("Expected", 0, "Got", f)
+	}
+	if f := wm.FreqRange(1, 2, 7, 6); f != uint64(0) {
+		t.Error("Expected", 0, "Got", f)
+	}
+
 	if f := wm.FreqSum(0, 3); f != uint64(5) {
 		t.Error("Expected", 5, "Got", f)
 	}

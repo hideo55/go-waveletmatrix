@@ -5,11 +5,11 @@ import (
 	"github.com/hideo55/go-sbvector"
 )
 
-type WMBuilderData struct {
+type wmBuilderData struct {
 	wm *WMData
 }
 
-type WMBuilder interface {
+type wmBuilder interface {
 	Build(src []uint64) (WaveletMatrix, error)
 }
 
@@ -17,13 +17,13 @@ var (
 	ErrorEmpty = errors.New("Argument is empty.")
 )
 
-func NewWMBuilder() WMBuilder {
-	builder := &WMBuilderData{}
+func NewWM(src []uint64) (WaveletMatrix, error) {
+	builder := &wmBuilderData{}
 	builder.wm = &WMData{}
-	return builder
+	return builder.Build(src)
 }
 
-func (builder *WMBuilderData) Build(src []uint64) (WaveletMatrix, error) {
+func (builder *wmBuilderData) Build(src []uint64) (WaveletMatrix, error) {
 	builder.wm = &WMData{}
 	wm := builder.wm
 	alphabetNum := getAlphabetNum(src)

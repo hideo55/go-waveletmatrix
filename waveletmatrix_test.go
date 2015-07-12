@@ -69,6 +69,11 @@ func TestBuildAndAccess(t *testing.T) {
 	if r := wm.RankMoreThan(3, 5); r != uint64(2) {
 		t.Error("Expected", 2, "Got", r)
 	}
+	r, rl, rm := wm.RankAll(10, 0, 6)
+	if r != NotFound || rl != NotFound || rm != NotFound {
+		t.Error("Unexpected")
+	}
+
 	if f := wm.Freq(2); f != uint64(2) {
 		t.Error("Expected", 2, "Got", f)
 	}

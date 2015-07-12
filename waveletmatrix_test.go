@@ -20,6 +20,13 @@ func TestBuildAndAccess(t *testing.T) {
 			t.Error("Expected", src[i], "Got", v)
 		}
 	}
+	if v, found := wm.Lookup(uint64(len(src))); found {
+		t.Error("Unexpected", v)
+	}
+
+	if r, _ := wm.Rank(0, 0); r != uint64(0) {
+		t.Error("Expected", 0, "Got", r)
+	}
 	if r, _ := wm.Rank(3, 6); r != uint64(0) {
 		t.Error("Expected", 0, "Got", r)
 	}
@@ -38,13 +45,23 @@ func TestBuildAndAccess(t *testing.T) {
 	if _, found := wm.Rank(1, 10); found {
 		t.Error("Expected", false, "Got", found)
 	}
+
+	// Select
 	if pos, _ := wm.Select(2, 1); pos != uint64(4) {
 		t.Error("Expected", 4, "Got", pos)
 	}
-
 	if pos, _ := wm.Select(2, 2); pos != uint64(5) {
 		t.Error("Expected", 5, "Got", pos)
 	}
+	// c >= alphabetNum
+	if _, found := wm.Select(10, 1); found {
+		t.Error("Unexpected")
+	}
+	// Invalid rank
+	if _, found := wm.Select(1, 2); found {
+		t.Error("Unexpected")
+	}
+
 
 	if r := wm.RankLessThan(4, 5); r != uint64(3) {
 		t.Error("Expected", 3, "Got", r)

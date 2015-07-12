@@ -93,7 +93,7 @@ func (wm *WMData) Rank(c, pos uint64) (uint64, bool) {
 	}
 
 	if pos == 0 {
-		return 0, true
+		return 0, false
 	}
 
 	beginPos := wm.nodePos[wm.alphabetBitNum-uint64(1)][c]
@@ -170,7 +170,7 @@ func (wm *WMData) Select(c, rank uint64) (uint64, bool) {
 }
 
 func (wm *WMData) SelectFromPos(c, pos, rank uint64) (uint64, bool) {
-	if c >= wm.alphabetNum || pos >= wm.size {
+	if c >= wm.alphabetNum || pos >= wm.size || rank > wm.Freq(c) {
 		return NotFound, false
 	}
 

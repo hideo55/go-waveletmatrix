@@ -62,6 +62,13 @@ func TestBuildAndAccess(t *testing.T) {
 	if _, found := wm.Select(1, 2); found {
 		t.Error("Unexpected")
 	}
+	if pos, _ := wm.SelectFromPos(0, 3, 1); pos != uint64(6) {
+		t.Error("Expected", 6, "Got", pos)
+	}
+	if _, found := wm.SelectFromPos(0, 3, 2); found {
+		t.Error("Unexpected")
+	}
+
 
 	if r := wm.RankLessThan(4, 5); r != uint64(3) {
 		t.Error("Expected", 3, "Got", r)

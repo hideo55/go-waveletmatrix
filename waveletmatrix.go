@@ -35,6 +35,7 @@ type queryOnNode struct {
 	prefixChar uint64
 }
 
+// WaveletMatrix is interface of Wavelet-Matrix
 type WaveletMatrix interface {
 	Size() uint64
 	Lookup(pos uint64) (uint64, bool)
@@ -60,10 +61,14 @@ const (
 	NotFound uint64 = 0xFFFFFFFFFFFFFFFF
 )
 
+// Size returns size of wavelet-matrix
 func (wm *WMData) Size() uint64 {
 	return wm.size
 }
 
+// Lookup element by pos.
+// This function returns value of pos-th element of wavelet-matrix. 
+// if pos >= (size of wavelet-matrix),  value of second result parameter is false. 
 func (wm *WMData) Lookup(pos uint64) (uint64, bool) {
 	if pos >= wm.size {
 		return NotFound, false

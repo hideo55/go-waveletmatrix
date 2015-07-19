@@ -179,7 +179,7 @@ func (wm *WMData) Select(c, rank uint64) (uint64, bool) {
 	return wm.SelectFromPos(c, 0, rank)
 }
 
-// SelectPos returns the position of the (rank+1)-th occurrence of `c` in the suffix of the array starting from 'pos'
+// SelectFromPos returns the position of the (rank+1)-th occurrence of `c` in the suffix of the array starting from 'pos'
 func (wm *WMData) SelectFromPos(c, pos, rank uint64) (uint64, bool) {
 	if c >= wm.alphabetNum || pos >= wm.size || rank > wm.Freq(c) {
 		return NotFound, false

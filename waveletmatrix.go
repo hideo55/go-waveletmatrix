@@ -67,8 +67,8 @@ func (wm *WMData) Size() uint64 {
 }
 
 // Lookup element by pos.
-// This function returns value of pos-th element of wavelet-matrix. 
-// if pos >= (size of wavelet-matrix),  value of second result parameter is false. 
+// This function returns value of pos-th element of wavelet-matrix.
+// if pos >= (size of wavelet-matrix),  value of second result parameter is false.
 func (wm *WMData) Lookup(pos uint64) (uint64, bool) {
 	if pos >= wm.size {
 		return NotFound, false
@@ -162,7 +162,7 @@ func (wm *WMData) RankAll(c, beginPos, endPos uint64) (rank, rankLessThan, rankM
 	return
 }
 
-// RankLessThan returns the frequency of characters c' < c in the subarray A[0...pos) 
+// RankLessThan returns the frequency of characters c' < c in the subarray A[0...pos)
 func (wm *WMData) RankLessThan(c, pos uint64) uint64 {
 	_, rank, _ := wm.RankAll(c, 0, pos)
 	return rank
@@ -385,7 +385,7 @@ func prefixCode(x, size, bitNum uint64) uint64 {
 }
 
 func (wm *WMData) checkPrefix(prefix, depth, minC, maxC uint64) bool {
-	if prefixCode(minC, depth, wm.alphabetBitNum) <= prefix && prefixCode(maxC - uint64(1), depth, wm.alphabetBitNum) >= prefix {
+	if prefixCode(minC, depth, wm.alphabetBitNum) <= prefix && prefixCode(maxC-uint64(1), depth, wm.alphabetBitNum) >= prefix {
 		return true
 	}
 	return false

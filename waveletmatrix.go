@@ -92,6 +92,7 @@ func (wm *WMData) Lookup(pos uint64) (uint64, bool) {
 	return c, true
 }
 
+// Rank returns the frequency of a character 'c' in the prefix of the array A[0...pos)
 func (wm *WMData) Rank(c, pos uint64) (uint64, bool) {
 	if c >= wm.alphabetNum || pos > wm.size {
 		return NotFound, false
@@ -117,6 +118,7 @@ func (wm *WMData) Rank(c, pos uint64) (uint64, bool) {
 	return endPos - beginPos, true
 }
 
+// RankAll returns the frequency of characters c' < c, c'=c, and c' > c, in the subarray A[begPos...endPos)
 func (wm *WMData) RankAll(c, beginPos, endPos uint64) (rank, rankLessThan, rankMoreThan uint64) {
 	if c >= wm.alphabetNum || beginPos >= wm.size || endPos > wm.size {
 		rank = NotFound
@@ -160,20 +162,24 @@ func (wm *WMData) RankAll(c, beginPos, endPos uint64) (rank, rankLessThan, rankM
 	return
 }
 
+// RankLessThan returns the frequency of characters c' < c in the subarray A[0...pos) 
 func (wm *WMData) RankLessThan(c, pos uint64) uint64 {
 	_, rank, _ := wm.RankAll(c, 0, pos)
 	return rank
 }
 
+// RankMoreThan returns the frequency of characters c' > c in the subarray A[0...pos)
 func (wm *WMData) RankMoreThan(c, pos uint64) uint64 {
 	_, _, rank := wm.RankAll(c, 0, pos)
 	return rank
 }
 
+// Select returns the position of the (rank+1)-th occurrence of `c` in the array.
 func (wm *WMData) Select(c, rank uint64) (uint64, bool) {
 	return wm.SelectFromPos(c, 0, rank)
 }
 
+// SelectPos returns the position of the (rank+1)-th occurrence of `c` in the suffix of the array starting from 'pos'
 func (wm *WMData) SelectFromPos(c, pos, rank uint64) (uint64, bool) {
 	if c >= wm.alphabetNum || pos >= wm.size || rank > wm.Freq(c) {
 		return NotFound, false
@@ -212,11 +218,13 @@ func (wm *WMData) SelectFromPos(c, pos, rank uint64) (uint64, bool) {
 	return index - uint64(1), true
 }
 
+// Freq returns the frequency of the character `c`.
 func (wm *WMData) Freq(c uint64) uint64 {
 	rank, _ := wm.Rank(c, wm.size)
 	return rank
 }
 
+// FreqSum returns frequency of the characters(minC <= c' < maxC)
 func (wm *WMData) FreqSum(minC, maxC uint64) uint64 {
 	sum := uint64(0)
 	for i := minC; i < maxC; i++ {
@@ -225,6 +233,7 @@ func (wm *WMData) FreqSum(minC, maxC uint64) uint64 {
 	return sum
 }
 
+// FreqRange returns the frequency of characters minC <= c' < maxC in the subarray A[begPos ... endPos)
 func (wm *WMData) FreqRange(minC, maxC, begPos, endPos uint64) uint64 {
 	if minC >= wm.alphabetNum {
 		return uint64(0)
@@ -240,6 +249,7 @@ func (wm *WMData) FreqRange(minC, maxC, begPos, endPos uint64) uint64 {
 	return maxLess - minLess
 }
 
+// QuantileRange returns the K-th smallest value( and position) in the subarray A[begPos ... endPos)
 func (wm *WMData) QuantileRange(begPos, endPos, k uint64) (pos, val uint64) {
 	if endPos >= wm.size || begPos >= endPos || k >= (endPos-begPos) {
 		pos = NotFound
@@ -293,11 +303,13 @@ func (wm *WMData) QuantileRange(begPos, endPos, k uint64) (pos, val uint64) {
 	return
 }
 
+// MaxRange returns maximum value(and position) in the subarray A[begPos .. endPos]
 func (wm *WMData) MaxRange(begPos, endPos uint64) (pos, val uint64) {
 	pos, val = wm.QuantileRange(begPos, endPos, endPos-begPos-uint64(1))
 	return
 }
 
+// MinRange returns minimum value(and position) in the subarray A[begPos .. endPos]
 func (wm *WMData) MinRange(begPos, endPos uint64) (pos, val uint64) {
 	pos, val = wm.QuantileRange(begPos, endPos, 0)
 	return
@@ -326,14 +338,17 @@ func (wm *WMData) listRange(minC, maxC, begPos, endPos, num uint64, comparator p
 	return res
 }
 
+// ListModeRange returns list of the distinct characters appeared in A[begPos ... endPos) from most frequent ones.
 func (wm *WMData) ListModeRange(minC, maxC, begPos, endPos, num uint64) []ListResult {
 	return wm.listRange(minC, maxC, begPos, endPos, num, modeComparator)
 }
 
+// ListMinRange returns list of the distinct characters in A[begPos ... endPos) minC <= c < maxC  from smallest ones.
 func (wm *WMData) ListMinRange(minC, maxC, begPos, endPos, num uint64) []ListResult {
 	return wm.listRange(minC, maxC, begPos, endPos, num, minComparator)
 }
 
+// ListMaxRange returns list of the distinct characters appeared in A[begPos ... endPos) from largest ones.
 func (wm *WMData) ListMaxRange(minC, maxC, begPos, endPos, num uint64) []ListResult {
 	return wm.listRange(minC, maxC, begPos, endPos, num, maxComparator)
 }

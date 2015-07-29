@@ -31,7 +31,9 @@ func main() {
     val, _ := wm.Lookup(3) 
     fmt.Println(val) // 4 ... src[3]
     rank, _ := wm.Rank(2, 6) 
-    fmt.Println(rank) // 1 ... The number of 2 in vec[0..5]
+    fmt.Println(rank) // 1 ... The number of 2 in src[0..5]
+    pos, _ := wm.Select(1, 3) // = 5 ... The third 1 appeared in src[5]
+    fmt.Println(pos)
 }
 ```
 

@@ -188,3 +188,27 @@ func TestBuildAndAccess(t *testing.T) {
 	}
 
 }
+
+func TestMarshalize(t *testing.T) {
+	src := []uint64{5, 1, 0, 4, 2, 2, 0, 3}
+	wm, _ := NewWM(src)
+	
+	buf, _ := wm.MarshalBinary()
+	wm2, err := NewWMFromBinary(buf)
+	if err != nil {
+		t.Error("Unexpected error in UnmarshalBinary()")
+	}
+
+	if wm2.Size() != uint64(len(src)) {
+		t.Error("Exprected", len(src), "Got", wm2.Size())
+	}
+	for i := 0; i < len(src); i++ {
+		v, found := wm2.Lookup(uint64(i))
+		if !found {
+			t.Error("Not Found:", i)
+		}
+		if v != src[i] {
+			t.Error("Expected", src[i], "Got", v)
+		}
+	}
+}

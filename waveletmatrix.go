@@ -29,6 +29,11 @@ Synopsis
 package waveletmatrix
 
 import (
+	"bytes"
+	"encoding"
+	"encoding/binary"
+	"errors"
+
 	"github.com/hideo55/go-pq"
 	"github.com/hideo55/go-sbvector"
 )
@@ -62,6 +67,8 @@ type queryOnNode struct {
 
 // WaveletMatrix is interface of Wavelet-Matrix
 type WaveletMatrix interface {
+	encoding.BinaryMarshaler
+	encoding.BinaryUnmarshaler
 	Size() uint64
 	Lookup(pos uint64) (uint64, bool)
 	Rank(c, pos uint64) (uint64, bool)
@@ -84,7 +91,21 @@ type WaveletMatrix interface {
 const (
 	// NotFound indicates `value is not found`
 	NotFound uint64 = 0xFFFFFFFFFFFFFFFF
+
+	sizeOfInt32 uint64 = 4
+	sizeOfInt64 uint64 = 8
 )
+
+var (
+	// ErrorInvalidFormat indicates that binary format is invalid.
+	ErrorInvalidFormat = errors.New("UnmarshalBinary: invalid binary format")
+)
+
+func NewWMFromBinary(data []byte) (WaveletMatrix, error) {
+	wm := new(WMData)
+	err := wm.UnmarshalBinary(data)
+	return wm, err
+}
 
 // Size returns size of wavelet-matrix
 func (wm *WMData) Size() uint64 {
@@ -414,6 +435,131 @@ func (wm *WMData) checkPrefix(prefix, depth, minC, maxC uint64) bool {
 		return true
 	}
 	return false
+}
+
+func (wm *WMData) MarshalBinary() ([]byte, error) {
+	buffer := new(bytes.Buffer)
+	binary.Write(buffer, binary.LittleEndian, &wm.size)
+	binary.Write(buffer, binary.LittleEndian, &wm.alphabetNum)
+	binary.Write(buffer, binary.LittleEndian, &wm.alphabetBitNum)
+	bvSize := uint64(len(wm.bv))
+	binary.Write(buffer, binary.LittleEndian, &bvSize)
+	for i := uint64(0); i < bvSize; i++ {
+		buf, _ := wm.bv[i].MarshalBinary()
+		vsize := uint64(len(buf))
+		binary.Write(buffer, binary.LittleEndian, &vsize)
+		binary.Write(buffer, binary.LittleEndian, buf)
+	}
+	npSize := uint64(len(wm.nodePos))
+	binary.Write(buffer, binary.LittleEndian, &npSize)
+	for i := uint64(0); i < npSize; i++ {
+		arraySize := uint64(len(wm.nodePos[i]))
+		binary.Write(buffer, binary.LittleEndian, &arraySize)
+		for j := uint64(0); j < arraySize; j++ {
+			binary.Write(buffer, binary.LittleEndian, &(wm.nodePos[i][j]))
+		}
+	}
+	sepSize := uint64(len(wm.seps))
+	binary.Write(buffer, binary.LittleEndian, &sepSize)
+	for i := uint64(0); i < sepSize; i++ {
+		binary.Write(buffer, binary.LittleEndian, &(wm.seps[i]))
+	}
+
+	return buffer.Bytes(), nil
+}
+
+func (wm *WMData) UnmarshalBinary(data []byte) error {
+	dataLen := uint64(len(data))
+	offset := uint64(0)
+	if dataLen < offset+sizeOfInt64 {
+		return ErrorInvalidFormat
+	}
+	buf := data[offset : offset+sizeOfInt64]
+	offset += sizeOfInt64
+	wm.size = binary.LittleEndian.Uint64(buf)
+
+	if dataLen < offset+sizeOfInt64 {
+		return ErrorInvalidFormat
+	}
+	buf = data[offset : offset+sizeOfInt64]
+	offset += sizeOfInt64
+	wm.alphabetNum = binary.LittleEndian.Uint64(buf)
+
+	if dataLen < offset+sizeOfInt64 {
+		return ErrorInvalidFormat
+	}
+	buf = data[offset : offset+sizeOfInt64]
+	offset += sizeOfInt64
+	wm.alphabetBitNum = binary.LittleEndian.Uint64(buf)
+
+	if dataLen < offset+sizeOfInt64 {
+		return ErrorInvalidFormat
+	}
+	buf = data[offset : offset+sizeOfInt64]
+	offset += sizeOfInt64
+	bvSize := binary.LittleEndian.Uint64(buf)
+	wm.bv = make([]*sbvector.BitVectorData, bvSize)
+
+	for i := uint64(0); i < bvSize; i++ {
+		if dataLen < offset+sizeOfInt64 {
+			return ErrorInvalidFormat
+		}
+		buf := data[offset : offset+sizeOfInt64]
+		offset += sizeOfInt64
+		vsize := binary.LittleEndian.Uint64(buf)
+
+		if dataLen < offset+vsize {
+			return ErrorInvalidFormat
+		}
+		buf = data[offset : offset+vsize]
+		bv, err := sbvector.NewVectorFromBinary(buf)
+		if err != nil {
+			return ErrorInvalidFormat
+		}
+		wm.bv[i] = bv.(*sbvector.BitVectorData)
+		offset += vsize
+	}
+	if dataLen < offset+sizeOfInt64 {
+		return ErrorInvalidFormat
+	}
+	buf = data[offset : offset+sizeOfInt64]
+	offset += sizeOfInt64
+	npSize := binary.LittleEndian.Uint64(buf)
+	wm.nodePos = make([][]uint64, npSize)
+	for i := uint64(0); i < npSize; i++ {
+		if dataLen < offset+sizeOfInt64 {
+			return ErrorInvalidFormat
+		}
+		buf := data[offset : offset+sizeOfInt64]
+		offset += sizeOfInt64
+		arrayLen := binary.LittleEndian.Uint64(buf)
+		if dataLen < offset+sizeOfInt64*arrayLen {
+			return ErrorInvalidFormat
+		}
+		wm.nodePos[i] = make([]uint64, arrayLen)
+		for j := uint64(0); j < arrayLen; j++ {
+			buf := data[offset : offset+sizeOfInt64]
+			wm.nodePos[i][j] = binary.LittleEndian.Uint64(buf)
+			offset += sizeOfInt64
+		}
+	}
+	if dataLen < offset+sizeOfInt64 {
+		return ErrorInvalidFormat
+	}
+	buf = data[offset : offset+sizeOfInt64]
+	offset += sizeOfInt64
+	sepSize := binary.LittleEndian.Uint64(buf)
+	if dataLen < offset+sepSize*sizeOfInt64 {
+		return ErrorInvalidFormat
+	}
+	wm.seps = make([]uint64, sepSize)
+	for i := uint64(0); i < sepSize; i++ {
+		buf := data[offset : offset+sizeOfInt64]
+		wm.seps[i] = binary.LittleEndian.Uint64(buf)
+		offset += sizeOfInt64
+	}
+
+	return nil
 }
 
 func toBool(bit uint64) bool {

@@ -437,6 +437,10 @@ func (wm *WMData) checkPrefix(prefix, depth, minC, maxC uint64) bool {
 	return false
 }
 
+
+/*
+MarshalBinary implements the encoding.BinaryMarshaler interface.
+*/
 func (wm *WMData) MarshalBinary() ([]byte, error) {
 	buffer := new(bytes.Buffer)
 	binary.Write(buffer, binary.LittleEndian, &wm.size)
@@ -468,6 +472,9 @@ func (wm *WMData) MarshalBinary() ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
+/*
+UnmarshalBinary implements the encoding.BinaryUnmarshaler interface.
+*/
 func (wm *WMData) UnmarshalBinary(data []byte) error {
 	dataLen := uint64(len(data))
 	offset := uint64(0)
